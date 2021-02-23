@@ -3,3 +3,22 @@ header {
   color: white;
   padding: 2em
 }
+
+.message-user-id {
+  float:left;
+}
+.message-text {
+  padding-left: 1em;
+}
+.message-timestamp {
+  float:right;
+  text-align: right;
+}
+
+.message-container-wrapper {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.message-container-wrapper::-webkit-scrollbar { 
+  display: none;  /* Safari and Chrome */
+}

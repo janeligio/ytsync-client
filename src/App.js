@@ -14,6 +14,7 @@ function App() {
     const [joinedRoom, setJoinedRoom] = useState(false);
     const [messages, setMessages] = useState([]);
     const [usersTyping, setUsersTyping] = useState([]);
+    const [isTyping, setIsTyping] = useState(false);
 
     useEffect(() => {
         socket.on('connect', () => {
@@ -22,9 +23,8 @@ function App() {
 
         socket.on('receive message', message => {
             log('received message');
-            log(message);
             message.timestamp = new Date(message.timestamp);
-            setMessages([...messages, message]);
+            setMessages(m => [...m, message]);
         })
 
         socket.on('receive all messages', allMessages => {
@@ -35,18 +35,20 @@ function App() {
 
         socket.on('assign id', id => setId(id))
 
-        // socket.on('typing', userId => {
-        //     if (usersTyping.indexOf(userId) < 0) {
-        //         log('user typing')
-        //         log(usersTyping)
-        //         setUsersTyping([...usersTyping, userId]);
-        //         setTimeout(() => {
-        //             setUsersTyping([...usersTyping.filter(user => user !== userId)])
-        //             log('user done typing')
-        //         }, 2000)
-        //     }
-        // })
-    }, [setMessages, messages, setUsersTyping, usersTyping])
+        socket.on('typing', userId => {
+            handleOnTyping(userId);
+        })
+    }, [])
+
+    const handleOnTyping = (userId) => {
+        const set = new Set([...usersTyping, userId]);
+        setUsersTyping([...set]);
+        setTimeout(() => {
+            const newSet = new Set([...usersTyping]);
+            newSet.delete(userId);
+            setUsersTyping([...newSet])
+        }, 1000)
+    }
 
     function joinRoom() {
         socket.emit('join room', room, id, r => {
@@ -62,7 +64,13 @@ function App() {
     }
 
     function emitUserTyping() {
-        socket.emit('typing', room, id);
+        if(!isTyping) {
+            setIsTyping(true);
+            socket.emit('typing', room, id);
+            setTimeout(() => {
+                setIsTyping(false);
+            }, 1000)
+        }
     }
 
     return (
@@ -88,16 +96,16 @@ function ChatBox({ room, messages, sendMessage, emitUserTyping, usersTyping }) {
         overflow: 'hidden'
     }
     const messageContainerStyle = {
-        border: '1px solid black',
         padding: 0,
-        margin: 0
+        margin: 0,
+        height: 500,
+        overflowY:'scroll',
     }
     const messageStyle = {
         listStyleType: 'none',
-        borderBottom: '1px solid black'
     }
 
-    let typing = usersTyping || [];
+    let typing = [...usersTyping] || [];
     let usersTypingEl = <li></li>;
     if(typing.length > 0) {
         if(typing.length === 1) {
@@ -107,13 +115,20 @@ function ChatBox({ room, messages, sendMessage, emitUserTyping, usersTyping }) {
         }
     }
     return (
-        <div style={style}>
-            <p style={{ margin: 0 }}>Room #{room}</p>
+        <div className="message-container-wrapper">
+            <p style={{ margin: 0, textAlign:'right' }}>Room #{room}</p>
             <ul style={messageContainerStyle}>
-                {messages.map(m => {
-                    return (<li key={randomRoomNumber(10)} style={messageStyle}>
-                        <b>User#{m.userId}</b> <p style={{ display: 'inline' }}>{m.message}</p> <small>{displayTimestamp(m.timestamp)}</small>
-                    </li>)
+                {messages.map((m, index) => {
+                    const background = (index % 2 === 0) ? '#efefef' : 'white';
+                    const userId = <b className="message-user-id">User#{m.userId}</b> 
+                    const message = <span className="message-text">{m.message}</span>;
+                    const timestamp = <small className="message-timestamp">{displayTimestamp(m.timestamp)}</small>;
+                    return (
+                        <li key={randomRoomNumber(10)} style={{...messageStyle, background}}>
+                            <p style={{lineHeight:'1.5em', margin:0, padding:'0.5em'}}>
+                                {userId} {message} {timestamp}
+                            </p>
+                        </li>)
                 })}
                 { usersTypingEl }
             </ul>

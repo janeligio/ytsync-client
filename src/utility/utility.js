@@ -31,3 +31,5 @@ export function parseURL(URL) {
     }
     return videoId;
 }
+
+export const outline = { border: '1px solid white'};

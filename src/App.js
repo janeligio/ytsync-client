@@ -3,7 +3,14 @@ import socketIOClient from 'socket.io-client';
 import Events from './events/Events';
 import YoutubePlayer from './components/YoutubePlayer';
 import ChatBox from './components/ChatBox';
-import { parseURL, randomRoomNumber} from './utility/utility';
+import { parseURL, outline } from './utility/utility';
+import Button from 'react-bootstrap/Button';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import InputGroup from 'react-bootstrap/InputGroup';
+import FormControl from 'react-bootstrap/FormControl';
+import Alert from 'react-bootstrap/Alert';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -14,15 +21,15 @@ let socket = socketIOClient(api);
 
 function App() {
     const [id, setId] = useState('');
-    const [room, setRoom] = useState(`${randomRoomNumber(4)}`)
-    const [joinedRoom, setJoinedRoom] = useState(false);
+    const [room, setRoom] = useState('')
     const [messages, setMessages] = useState([]);
     const [usersTyping, setUsersTyping] = useState([]);
     const [isTyping, setIsTyping] = useState(false);
     const [queue, setQueue] = useState(['utdDBdYEasc']);
     const [currentVideo, setCurrentVideo] = useState(0);
     const [currentView, setCurrentView] = useState('Home');
-
+    const [alert, setAlert] = useState('');
+    
     useEffect(() => {
         socket.on('connect', () => {
             log('connected')
@@ -59,12 +66,22 @@ function App() {
         }, 1000)
     }
 
+    function createRoom() {
+        socket.emit(Events.create_room, id, r => {
+            if(r.status === 'ok') {
+                setRoom(r.room);
+                setCurrentView('Room');
+            }
+        })
+    }
     function joinRoom() {
         socket.emit(Events.join_room, room, id, r => {
             if (r.status === 'ok') {
-                setJoinedRoom(true);
                 setRoom(r.room);
                 setCurrentView('Room');
+            } else {
+                setAlert(r.errors);
+                setRoom('');
             }
         })
     }
@@ -72,7 +89,6 @@ function App() {
     function leaveRoom() {
         socket.emit(Events.leave_room, room, r => {
             if(r.status === 'ok') {
-                setJoinedRoom(false);
                 setRoom('');
                 setCurrentView('Home');
             }
@@ -104,10 +120,16 @@ function App() {
 
     return (
         <div className="App">
-            <header>YTsync</header>
+            <header className="App-header">YTsync</header>
             <main>
                 {currentView === 'Home' && 
-                    <Home room={room} setRoom={setRoom} joinRoom={joinRoom}/>}
+                    <Home 
+                        room={room} 
+                        setRoom={setRoom} 
+                        joinRoom={joinRoom} 
+                        createRoom={createRoom} 
+                        alert={alert}
+                        setAlert={setAlert}/>}
                 {currentView === 'Room' && 
                     <Room>
                         <button onClick={leaveRoom}>Leave Room</button>
@@ -131,16 +153,40 @@ function App() {
 }
 
 function Home(props) {
-    const { room, setRoom, joinRoom } = props;
+    const { room, setRoom, joinRoom, createRoom, alert, setAlert } = props;
     return (
-        <div>
-            <input value={room} onChange={e => setRoom(e.target.value)} />
-            <button onClick={joinRoom}>Join Room</button>
-        </div>
+        <Container style={{...outline, padding:'1em'}}>
+                <Button className="home" onClick={createRoom} block>Create Room</Button>
+                <p className="home">Or</p>
+                <InputGroup className="mb-3">
+                    <InputGroup.Prepend>
+                    <Button className="home" onClick={joinRoom} block>Join Room</Button> 
+                    </InputGroup.Prepend>
+                    <FormControl
+                        onChange={e => setRoom(e.target.value)} 
+                        placeholder="Room#"
+                        aria-label="Default"
+                        aria-describedby="inputGroup-sizing-default"
+                        />                
+                </InputGroup>
+                { alert && <AlertMessage alert={alert} setAlert={setAlert}/> }
+        </Container>
     );
 }
 
 function Room(props) {
     return (props.children);
+}
+
+function AlertMessage(props) {
+    const [show, setShow] = useState(true);
+    const { alert, setAlert } = props;
+    if(show) {
+        return (<Alert variant="danger" onClose={() => {
+            setShow(false);
+            setAlert('');
+        }} dismissible>{alert}</Alert>);
+    }
+    return null;
 }
 export default App;

@@ -1,5 +1,6 @@
 const Events = {
     assign_id: 'assign id', // params: id | Server: I'm assigning you an id.
+    create_room: 'create room', // params: room, id, callback | Client: I want to join a room.
     join_room: 'join room', // params: room, id, callback | Client: I want to join a room.
     leave_room: 'leave room', // params: room, callback | Client: I want to leave a room.
     send_message: 'send message', // params: room, id, text | Client: I want to send a message.

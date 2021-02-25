@@ -1,53 +1,93 @@
 import { useState } from 'react';
 import { displayTimestamp, randomRoomNumber} from '../utility/utility';
+import ListGroup from 'react-bootstrap/ListGroup';
+import Card from 'react-bootstrap/Card';
+import InputGroup from 'react-bootstrap/InputGroup';
+import Button from 'react-bootstrap/Button';
+import FormControl from 'react-bootstrap/FormControl';
 
-export default function ChatBox({ room, messages, sendMessage, emitUserTyping, usersTyping }) {
+export default function ChatBox({ messages, sendMessage, emitUserTyping, usersTyping }) {
     const [text, setText] = useState('');
 
-    const messageContainerStyle = {
-        padding: 0,
-        margin: 0,
-        height: 500,
-        overflowY:'scroll',
-    }
-    const messageStyle = {
-        listStyleType: 'none',
-    }
-
-    let typing = [...usersTyping] || [];
-    let usersTypingEl = <li></li>;
-    if(typing.length > 0) {
-        if(typing.length === 1) {
-            usersTypingEl = <li>User#{typing.join()} is typing...</li>;
-        } else {
-            usersTypingEl = <li>User#{typing.join(', ')} are typing...</li>;
+    function _onKeyUp(e) {
+        console.log(e);
+        console.log(`${e.key} ${e.keyCode}`);
+        if(e.key === 'Enter' && e.keyCode === 13) {
+            sendMessage(text); 
+            setText('');
         }
     }
     return (
         <div className="message-container-wrapper">
-            <p style={{ margin: 0, textAlign:'right' }}>Room #{room}</p>
-            <ul style={messageContainerStyle}>
-                {messages.map((m, index) => {
-                    const background = (index % 2 === 0) ? '#efefef' : 'white';
-                    const userId = <b className="message-user-id">User#{m.userId}</b> 
-                    const message = <span className="message-text">{m.message}</span>;
+            <ListGroup>
+                {messages.map(m => {
                     const timestamp = <small className="message-timestamp">{displayTimestamp(m.timestamp)}</small>;
                     return (
-                        <li key={randomRoomNumber(10)} style={{...messageStyle, background}}>
-                            <p style={{lineHeight:'1.5em', margin:0, padding:'0.5em'}}>
-                                {userId} {message} {timestamp}
-                            </p>
-                        </li>)
+                        <ListGroup.Item className="message" key={randomRoomNumber(10)}>
+                            <Card style={{ width: '100%', background:'inherit' }}>
+                            <Card.Body style={{padding:0}}>
+                                { m.messageType === 'chat' 
+                                    && <Card.Title style={{fontSize:'1em'}}>{m.userId} {timestamp}</Card.Title>}
+                                <Card.Text style={{fontSize:'1.em'}}>
+                                    {m.message} 
+                                    {` `}
+                                    {m.messageType === 'welcome' && timestamp} 
+                                    {m.messageType === 'fairwell' && timestamp}
+                                </Card.Text>
+                            </Card.Body>
+                            </Card>
+                        </ListGroup.Item>)
                 })}
-                { usersTypingEl }
-            </ul>
-            <span>
-                <input style={{ width: '88%' }} value={text} onChange={e => {
-                    setText(e.target.value);
-                    emitUserTyping();
-                }} />
-                <button style={{ width: '10%' }} onClick={e => { sendMessage(text); setText('') }}>Send</button>
-            </span>
+                <UsersTyping usersTyping={usersTyping}/>
+            </ListGroup>
+            <InputGroup className="mb-3">
+                <FormControl
+                    onKeyUp={_onKeyUp}
+                    onChange={e => {
+                        setText(e.target.value);
+                        emitUserTyping();
+                    }} 
+                    value={text}
+                    placeholder=""
+                    aria-label="Default"
+                    aria-describedby="inputGroup-sizing-default"
+                    />
+                <InputGroup.Append>
+                <Button className="home" onClick={() => { sendMessage(text); setText('') }} block>Send</Button> 
+                </InputGroup.Append>        
+            </InputGroup>
         </div>
     );
 };
+
+function UsersTyping(props) {
+    const { usersTyping } = props;
+    let users = usersTyping || [];
+    let usersTypingEl = <ListGroup.Item className="message"></ListGroup.Item>;
+    if(users.length > 0) {
+        if(users.length === 1) {
+            usersTypingEl = 
+                <ListGroup.Item className="message">
+                    <Card style={{ width: '100%', background:'inherit' }}>
+                        <Card.Body style={{padding:0}}>
+                            <Card.Text style={{fontSize:'0.8em', textAlign:'center'}}>
+                                {users.join()} is typing...
+                            </Card.Text>
+                        </Card.Body>
+                    </Card>
+                </ListGroup.Item>;
+        } else {
+            usersTypingEl =
+            <ListGroup.Item className="message">
+                <Card style={{ width: '100%', background:'inherit' }}>
+                    <Card.Body style={{padding:0}}>
+                        <Card.Text style={{fontSize:'0.8em', textAlign:'center'}}>
+                            {users.join(', ')} are typing...
+                        </Card.Text>
+                    </Card.Body>
+                </Card>
+            </ListGroup.Item>;
+        }
+    }
+    return (usersTypingEl);
+}

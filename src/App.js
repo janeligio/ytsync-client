@@ -125,14 +125,15 @@ function App() {
                 {currentView === 'Home' && 
                     <Home 
                         room={room} 
-                        setRoom={setRoom} 
+                        setRoom={setRoom}
                         joinRoom={joinRoom} 
                         createRoom={createRoom} 
                         alert={alert}
                         setAlert={setAlert}/>}
                 {currentView === 'Room' && 
                     <Room>
-                        <button onClick={leaveRoom}>Leave Room</button>
+                        <p style={{ margin: 0, textAlign:'right' }}>Room #{room}</p>
+                        <Button size="sm" className="room" onClick={leaveRoom}>Leave Room</Button>
                         <YoutubePlayer 
                             queue={queue}
                             addToQueue={addToQueue}
@@ -164,7 +165,7 @@ function Home(props) {
                     </InputGroup.Prepend>
                     <FormControl
                         onChange={e => setRoom(e.target.value)} 
-                        placeholder="Room#"
+                        placeholder="Room #"
                         aria-label="Default"
                         aria-describedby="inputGroup-sizing-default"
                         />                

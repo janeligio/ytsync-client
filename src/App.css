@@ -34,16 +34,19 @@ p.home {
   margin: 0;
 }
 
-.message-user-id {
-  float:left;
+/* Room styles */
+button.room {
+  background-color: var(--s-dark);
 }
-.message-text {
-  padding-left: 1em;
+button.room:hover {
+  background-color: var(--s);
+  color: #000
 }
-.message-timestamp {
-  float:right;
-  text-align: right;
-}
+
+
+
+
+
 
 .message-container-wrapper {
   -ms-overflow-style: none;  /* Internet Explorer 10+ */
@@ -51,4 +54,18 @@ p.home {
 }
 .message-container-wrapper::-webkit-scrollbar { 
   display: none;  /* Safari and Chrome */
+}
+
+div.message {
+  background: var(--p-dark);
+  color: #fff;
+  padding: 0.5em;
+  display: flex;
+}
+div.message:nth-child(odd) {
+  background: var(--p);
+}
+.message-timestamp {
+  text-align: left;
+  display: inline;
 }

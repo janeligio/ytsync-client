@@ -10,8 +10,6 @@ export default function ChatBox({ messages, sendMessage, emitUserTyping, usersTy
     const [text, setText] = useState('');
 
     function _onKeyUp(e) {
-        console.log(e);
-        console.log(`${e.key} ${e.keyCode}`);
         if(e.key === 'Enter' && e.keyCode === 13) {
             sendMessage(text); 
             setText('');

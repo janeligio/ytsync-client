@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import socketIOClient from 'socket.io-client';
 import Events from './events/Events';
 import YoutubePlayer from './components/YoutubePlayer';
+import VideoQueue from './components/VideoQueue';
 import ChatBox from './components/ChatBox';
 import { parseURL, outline } from './utility/utility';
 import Button from 'react-bootstrap/Button';
@@ -11,6 +12,8 @@ import Col from 'react-bootstrap/Col';
 import InputGroup from 'react-bootstrap/InputGroup';
 import FormControl from 'react-bootstrap/FormControl';
 import Alert from 'react-bootstrap/Alert';
+import Tabs from 'react-bootstrap/Tabs';
+import Tab from 'react-bootstrap/Tab';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -25,7 +28,7 @@ function App() {
     const [messages, setMessages] = useState([]);
     const [usersTyping, setUsersTyping] = useState([]);
     const [isTyping, setIsTyping] = useState(false);
-    const [queue, setQueue] = useState(['utdDBdYEasc']);
+    const [queue, setQueue] = useState([]);
     const [currentVideo, setCurrentVideo] = useState(0);
     const [currentView, setCurrentView] = useState('Home');
     const [alert, setAlert] = useState('');
@@ -44,6 +47,12 @@ function App() {
             setMessages([...allMessages]);
         })
 
+        socket.on(Events.get_queue, queue => {
+            setQueue([...queue]);
+        })
+        socket.on(Events.get_current_video, curr => {
+            setCurrentVideo(curr);
+        })
         socket.on(Events.assign_id, id => setId(id))
 
         socket.on(Events.typing, userId => {
@@ -132,21 +141,30 @@ function App() {
                         setAlert={setAlert}/>}
                 {currentView === 'Room' && 
                     <Room>
-                        <p style={{ margin: 0, textAlign:'right' }}>Room #{room}</p>
+                        <p style={{ margin: 0, textAlign:'right', color:'white' }}>Room #{room}</p>
                         <Button size="sm" className="room" onClick={leaveRoom}>Leave Room</Button>
-                        <YoutubePlayer 
+                        <YoutubePlayer
                             queue={queue}
-                            addToQueue={addToQueue}
+                            setQueue={setQueue}
                             currentVideo={currentVideo}
+                            setCurrentVideo={setCurrentVideo}
                             socket={socket}
                             room={room}
                             />
-                        <ChatBox 
-                            room={room} 
-                            messages={messages} 
-                            sendMessage={sendMessage} 
-                            emitUserTyping={emitUserTyping} 
-                            usersTyping={usersTyping}/>
+                        <Tabs defaultActiveKey="queue">
+                            <Tab eventKey="queue" title="Queue">
+                                <VideoQueue queue={queue} addToQueue={addToQueue}/>
+                            </Tab>
+                            <Tab eventKey="chat" title="Chat">
+                                <ChatBox 
+                                room={room} 
+                                messages={messages} 
+                                sendMessage={sendMessage} 
+                                emitUserTyping={emitUserTyping} 
+                                usersTyping={usersTyping}/>
+                            </Tab>
+                        </Tabs>
+
                     </Room>}
             </main>
         </div>

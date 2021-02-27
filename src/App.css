@@ -69,3 +69,7 @@ div.message:nth-child(odd) {
   text-align: left;
   display: inline;
 }
+
+#youtube-queue-input {
+  height: 2em;
+}

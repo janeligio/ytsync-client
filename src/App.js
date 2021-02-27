@@ -38,6 +38,8 @@ function App() {
             log('connected')
         })
 
+        socket.on(Events.assign_id, id => setId(id))
+
         socket.on(Events.receive_message, message => {
             message.timestamp = new Date(message.timestamp);
             setMessages(m => [...m, message]);
@@ -46,6 +48,11 @@ function App() {
         socket.on(Events.receive_all_messages, allMessages => {
             setMessages([...allMessages]);
         })
+        socket.on(Events.receive_room_state, state => {
+            setMessages([...state.chatHistory]);
+            setQueue([...state.queue]);
+            setCurrentVideo([...state.currentVideo]);
+        })
 
         socket.on(Events.get_queue, queue => {
             setQueue([...queue]);
@@ -53,7 +60,6 @@ function App() {
         socket.on(Events.get_current_video, curr => {
             setCurrentVideo(curr);
         })
-        socket.on(Events.assign_id, id => setId(id))
 
         socket.on(Events.typing, userId => {
             handleOnTyping(userId);

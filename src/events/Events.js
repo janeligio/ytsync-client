@@ -11,10 +11,11 @@ const Events = {
     get_queue: 'get queue', // params: room, queue | Client: I want to get the room's queue
     get_current_video: 'get current video',
     player_play: 'player play', // params: room | Client: Start the video for everyone.
+    player_play_at: 'player play at', // params: room | Client: Start the video for everyone.
     player_pause: 'player pause', // params: room | Client: Pause the video for everyone.
     player_get_status: 'player get status', // params: none | Client: What is the current state of the video player?
     player_set_status: 'player set status', // params: currentTime, playerState, videoId | Client: Here is the status of the video.
     
+    receive_room_state: 'receive room state',
 }
-
 export default Events;

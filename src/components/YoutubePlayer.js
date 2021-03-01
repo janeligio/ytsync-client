@@ -3,6 +3,8 @@ import axios from 'axios';
 import Youtube from 'react-youtube';
 import Events from '../events/Events';
 import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
 const { log, dir } = console;
 
@@ -10,17 +12,8 @@ export default function YoutubePlayer(props) {
     const {queue, setQueue, currentVideo, setCurrentVideo, room, socket } = props;
     const [videoPlayer, setVideoPlayer] = useState(undefined);
     const [joined, setJoined] = useState(false);
-    const [interval, setIntervalState] = useState(null);
 
     useEffect(() => {
-        // let interval = setInterval(() => {
-        //     if(videoPlayer) {
-        //         const currentTime = videoPlayer.getCurrentTime();
-        //         const playerState = videoPlayer.getPlayerState();
-        //         socket.emit('player set current state', room, { currentTime, playerState});
-        //     }
-        // }, 2000)
-
         socket.on('player play', () => {
             log(`Event: player play`);
             if(videoPlayer) {
@@ -46,25 +39,11 @@ export default function YoutubePlayer(props) {
                 videoPlayer.pauseVideo();
             }
         })
-
-        socket.on('ping status', (message, callback) => {
-            const status = { currentTime: 0, playerState: -1};
-            if(videoPlayer) {
-                status.currentTime = videoPlayer.getCurrentTime();
-                status.playerState = videoPlayer.getPlayerState();
-                log(`Received ping - Current Time:${status.currentTime}, Player State:${status.playerState}`);
-                socket.emit({})
-            }
-        })
-        return () => {
-            if(interval) {
-                clearInterval(interval);
-            }
-        }
     }, [videoPlayer, socket, currentVideo, queue, setCurrentVideo, setQueue])
 
     const opts = {
         // height:'390', width:'640',
+        // height:'900', width:'1200',
         playerVars: {
             autoplay:1,
             controls:1, // Show the controls or not
@@ -75,14 +54,8 @@ export default function YoutubePlayer(props) {
     function _onReady(e) {
         setVideoPlayer(e.target);
         dir(videoPlayer);
-        // e.target.loadVideoById(queue[currentVideo]);
-        // If you're the only one in the room, get the queue and cue up a video and pause it
-        // If there are other people in the room, get the state of the room's video player
-            // If paused, get the current time of the video and pause the video
-            // If it's playing, get the current time of the video and play the video
         if(!joined) {
             log(`Getting room:${room} state.`)
-
             axios({
                 method:'get',
                 url: `/room/${room}`
@@ -100,39 +73,24 @@ export default function YoutubePlayer(props) {
 
     }
     function _onPlay(e) {
+        const currentTime = e.target.getCurrentTime();
+        const playerState = e.target.getPlayerState();
         if(joined) {
-            const currentTime = e.target.getCurrentTime();
-            const playerState = e.target.getPlayerState();
             log(`Broadcasting player play:${currentTime} ${playerState}`);
             socket.emit(Events.player_play_at, room, currentTime, playerState);
+            socket.emit('player start interval', room, currentTime);
         } else {
             setJoined(!joined);
-            if(interval) {
-                clearInterval(interval);
-            } else {
-                let interval = setInterval(() => {
-                    const currentTime = e.target.getCurrentTime();
-                    const playerState = e.target.getPlayerState();
-                    socket.emit('player set current state', room, {currentTime, playerState});
-                }, 2000);
-                setIntervalState(interval);
-            }
+            socket.emit('player start interval', room, currentTime);
         }
-        // socket.emit('player get state', callback => {
-        //     const difference = callback.currentTime - currentTime;
-        //     if(Math.abs(difference) > 5) {
-        //         socket.emit('player play at', room, currentTime, playerState);
-        //     } else {
-        //         socket.emit('player play', room, currentTime, playerState);
-        //     }
-        // })
     }
     function _onPause(e) {
         log('emitting pause')
+        const currentTime = e.target.getCurrentTime();
+        const playerState = e.target.getPlayerState();
         if(joined) {
-            const playerState = e.target.getPlayerState();
-            const currentTime = e.target.getCurrentTime();
             socket.emit('player pause', room, playerState, currentTime);
+            socket.emit('player stop interval', room, currentTime);
         } else if(!joined) {
             setJoined(!joined);
         }
@@ -145,9 +103,11 @@ export default function YoutubePlayer(props) {
 
 
     return (
-        <Container>  
+        <>  
             { queue.length > 0 ?
-                <Youtube  
+                <Youtube
+                    className="youtube-player"
+                    containerClassName="youtube-player-container" 
                     opts={opts}
                     videoId={queue[currentVideo]}
                     onReady={_onReady}
@@ -155,8 +115,24 @@ export default function YoutubePlayer(props) {
                     onPause={_onPause}                    // defaults -> noop
                     onEnd={_onEnd}
                     onStateChange={_onStateChange}/>
-            :   <div style={{border:'1px solid white'}}>Place holder</div>
+            :   <YoutubePlayerSkeleton/>
             }
 
-        </Container>);
+        </>);
 };
+
+function YoutubePlayerSkeleton() {
+    return (
+        <Container>
+            <Row>
+                <Col className="youtube-player-skeleton">
+                    <h3 style={{color:'white'}}>
+                        Add a youtube video...
+
+                    </h3>
+                </Col>
+            </Row>
+
+        </Container>
+    );
+}

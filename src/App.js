@@ -4,6 +4,7 @@ import Events from './events/Events';
 import YoutubePlayer from './components/YoutubePlayer';
 import VideoQueue from './components/VideoQueue';
 import ChatBox from './components/ChatBox';
+import NameChangeModal from './components/NameChangeModal';
 import { parseURL, outline } from './utility/utility';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
@@ -147,29 +148,46 @@ function App() {
                         setAlert={setAlert}/>}
                 {currentView === 'Room' && 
                     <Room>
-                        <p style={{ margin: 0, textAlign:'right', color:'white' }}>Room #{room}</p>
-                        <Button size="sm" className="room" onClick={leaveRoom}>Leave Room</Button>
-                        <YoutubePlayer
-                            queue={queue}
-                            setQueue={setQueue}
-                            currentVideo={currentVideo}
-                            setCurrentVideo={setCurrentVideo}
-                            socket={socket}
-                            room={room}
-                            />
-                        <Tabs defaultActiveKey="queue">
-                            <Tab eventKey="queue" title="Queue">
-                                <VideoQueue queue={queue} addToQueue={addToQueue}/>
-                            </Tab>
-                            <Tab eventKey="chat" title="Chat">
-                                <ChatBox 
-                                room={room} 
-                                messages={messages} 
-                                sendMessage={sendMessage} 
-                                emitUserTyping={emitUserTyping} 
-                                usersTyping={usersTyping}/>
-                            </Tab>
-                        </Tabs>
+                        <p style={{color:'white'}}>Room #{room}</p>
+                        <p style={{color:'white'}}>Name: {id}</p>
+                        <div style={{display:'flex', padding:'1em' }}>
+                            <Button size="sm" variant="danger" onClick={leaveRoom}>Leave Room</Button>
+                            <NameChangeModal socket={socket} alias={id}/>
+                            {/* <p style={{ margin: 0, textAlign:'right', color:'white' }}>Room #{room}</p> */}
+                        </div>
+
+                        <Container fluid>
+                            <Row style={{minHeight:'300px'}}>
+                                <Col sm={12} md={8} style={{ padding:0}}>
+                                    <YoutubePlayer
+                                    queue={queue}
+                                    setQueue={setQueue}
+                                    currentVideo={currentVideo}
+                                    setCurrentVideo={setCurrentVideo}
+                                    socket={socket}
+                                    room={room}
+                                    />
+                                </Col>
+                                <Col sm={12} md={4} style={{borderLeft:'1px solid var(--s-light)'}}>
+                                    <Tabs defaultActiveKey="chat">
+                                    <Tab eventKey="queue" title="Queue">
+                                        <VideoQueue queue={queue} addToQueue={addToQueue} />
+                                    </Tab>
+                                    <Tab eventKey="chat" title="Chat">
+                                        <ChatBox
+                                            room={room}
+                                            messages={messages}
+                                            sendMessage={sendMessage}
+                                            emitUserTyping={emitUserTyping}
+                                            usersTyping={usersTyping} />
+                                    </Tab>
+                                </Tabs>
+                                </Col>
+                            </Row>
+
+
+                        </Container>
+
 
                     </Room>}
             </main>
@@ -180,7 +198,7 @@ function App() {
 function Home(props) {
     const { room, setRoom, joinRoom, createRoom, alert, setAlert } = props;
     return (
-        <Container style={{...outline, padding:'1em'}}>
+        <Container style={{ padding:'1em', width:300}}>
                 <Button className="home" onClick={createRoom} block>Create Room</Button>
                 <p className="home">Or</p>
                 <InputGroup className="mb-3">

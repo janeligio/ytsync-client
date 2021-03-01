@@ -54,11 +54,12 @@ export default function YoutubePlayer(props) {
     function _onReady(e) {
         setVideoPlayer(e.target);
         dir(videoPlayer);
+        const API = 'https://ytsync-server.herokuapp.com';
         if(!joined) {
             log(`Getting room:${room} state.`)
             axios({
                 method:'get',
-                url: `/room/${room}`
+                url: `${API}/room/${room}`
             }).then(res => {
                 log(`Got room:${room} state.`)
                 log(`Current time:${res.data.currentTime}`, `Player state:${res.data.playerState}`);

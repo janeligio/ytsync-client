@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import Button from 'react-bootstrap/Button';
 import FormControl from 'react-bootstrap/FormControl';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -51,7 +50,9 @@ export default function VideoQueue(props) {
 function QueueSkeleton() {
     return (
         <Row style={{background:'var(--p)', color: 'white', marginBottom:'0.25em', padding:'0.5em'}}>
+            <Col>
             <p><em>Nothing here yet.</em></p>
+            </Col>
         </Row>
     );
 }
@@ -60,10 +61,11 @@ function VideoData({videoId}) {
     const [title, setTitle] = useState('');
     const [channel, setChannel] = useState('');
     const [thumbnailData, setThumbnailData] = useState(null);
+    const API = 'https://ytsync-server.herokuapp.com';
     useEffect(() => {
         axios({
             method:'get',
-            url:`/video/${videoId}`
+            url:`${API}/video/${videoId}`
         }).then(res => {
             console.log(res.data);
             setTitle(res.data.title);
@@ -81,9 +83,9 @@ function VideoData({videoId}) {
     return(
         <Row style={{background:'var(--p)', color: 'white', marginBottom:'0.25em'}}>
             {thumbnail}
-            <a style={{padding:'1em'}}>
+            <p style={{padding:'1em'}}>
                 <h3 style={{fontSize:'1em'}}>{title}</h3>
                 by {channel}
-            </a>
+            </p>
         </Row>)
 }

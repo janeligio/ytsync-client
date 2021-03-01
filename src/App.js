@@ -5,7 +5,8 @@ import YoutubePlayer from './components/YoutubePlayer';
 import VideoQueue from './components/VideoQueue';
 import ChatBox from './components/ChatBox';
 import NameChangeModal from './components/NameChangeModal';
-import { parseURL, outline } from './utility/utility';
+import { parseURL } from './utility/utility';
+// import { outline } from './utility/utility';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -196,7 +197,7 @@ function App() {
 }
 
 function Home(props) {
-    const { room, setRoom, joinRoom, createRoom, alert, setAlert } = props;
+    const { setRoom, joinRoom, createRoom, alert, setAlert } = props;
     return (
         <Container style={{ padding:'1em', width:300}}>
                 <Button className="home" onClick={createRoom} block>Create Room</Button>

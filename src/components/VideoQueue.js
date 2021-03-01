@@ -26,7 +26,11 @@ export default function VideoQueue(props) {
     }
     return (
         <div className="youtube-queue">
-            <div style={{padding:'1em'}}>
+            <Container fluid>
+                {queue.length > 0 ? queueEl
+                : <QueueSkeleton/>}
+            </Container>
+            <div style={{padding:'0'}}>
                 <FormControl
                     style={{borderRadius:0}}
                     id="youtube-queue-input"
@@ -40,11 +44,15 @@ export default function VideoQueue(props) {
                     aria-describedby="inputGroup-sizing-default"
                 />
             </div>
-            <Container fluid>
-                {queueEl}
-            </Container>
-
         </div>
+    );
+}
+
+function QueueSkeleton() {
+    return (
+        <Row style={{background:'var(--p)', color: 'white', marginBottom:'0.25em', padding:'0.5em'}}>
+            <p><em>Nothing here yet.</em></p>
+        </Row>
     );
 }
 
@@ -74,7 +82,7 @@ function VideoData({videoId}) {
         <Row style={{background:'var(--p)', color: 'white', marginBottom:'0.25em'}}>
             {thumbnail}
             <a style={{padding:'1em'}}>
-                <h3>{title}</h3>
+                <h3 style={{fontSize:'1em'}}>{title}</h3>
                 by {channel}
             </a>
         </Row>)

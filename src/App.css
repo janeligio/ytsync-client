@@ -73,3 +73,25 @@ div.message:nth-child(odd) {
 #youtube-queue-input {
   height: 2em;
 }
+
+.youtube-player-container {
+  border: 1px solid white;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  padding-top: 56.25%; /* 16:9 Aspect Ratio (divide 9 by 16 = 0.5625) */
+}
+.youtube-player {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.youtube-player-skeleton {
+  color: var(--s-light);
+  padding: 2em;
+}

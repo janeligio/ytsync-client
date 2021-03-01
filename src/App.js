@@ -19,7 +19,7 @@ import Tab from 'react-bootstrap/Tab';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const api = '/';
+const api = 'https://ytsync-server.herokuapp.com/';
 const { log } = console;
 
 let socket = socketIOClient(api);

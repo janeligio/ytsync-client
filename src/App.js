@@ -51,7 +51,7 @@ function App() {
         socket.on(Events.receive_room_state, state => {
             setMessages([...state.chatHistory]);
             setQueue([...state.queue]);
-            setCurrentVideo([...state.currentVideo]);
+            setCurrentVideo(state.currentVideo);
         })
 
         socket.on(Events.get_queue, queue => {
@@ -90,7 +90,7 @@ function App() {
         })
     }
     function joinRoom() {
-        socket.emit(Events.join_room, room, id, r => {
+        socket.emit(Events.join_room, room, r => {
             if (r.status === 'ok') {
                 setRoom(r.room);
                 setCurrentView('Room');

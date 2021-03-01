@@ -61,10 +61,11 @@ function VideoData({videoId}) {
     const [title, setTitle] = useState('');
     const [channel, setChannel] = useState('');
     const [thumbnailData, setThumbnailData] = useState(null);
+    const API = 'https://ytsync-server.herokuapp.com';
     useEffect(() => {
         axios({
             method:'get',
-            url:`/video/${videoId}`
+            url:`${API}/video/${videoId}`
         }).then(res => {
             console.log(res.data);
             setTitle(res.data.title);

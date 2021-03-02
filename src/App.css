@@ -8,15 +8,46 @@
   --s-dark: #81b9bf;
 
 }
+
+main {
+  flex: 1;
+}
+
 .App {
   background-color: var(--p-dark);
-  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 header {
-  background: var(--p-dark);
-  color: white;
+  color: var(--s-light);
   padding: 1em;
 }
+header > h1 {
+  font-size: 1.5em;
+  font-weight: 100;
+  text-align: center;
+}
+
+
+.home-parent {
+  position: relative;
+  height: 50vh;
+}
+.home-child {
+  width: 300px;
+  height: 200px;
+  padding: 20px;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+
+  /* margin: -70px 0 0 -170px; */
+  margin: -70px 0 0 -150px;
+}
+
+
 button.home {
   background: var(--s-dark);
 }
@@ -43,8 +74,37 @@ button.room:hover {
   color: #000
 }
 
+.tab-link-parent {
+  color: var(--s);
+}
+.tab-link-parent:active {
+  border: none;
 
+}
+.tab-link {
+  color: var(--s);
+  font-weight: 100;
+}
 
+.tab-link:hover, .tab-link:active {
+  color: var(--s-dark);
+  border: none;
+}
+
+.tab-link.active {
+  font-weight: 400;
+  border: none;
+}
+
+.room-text {
+  color: var(--s-light);
+  padding-left: 1em;
+  font-size: 0.9em;
+}
+.room-number:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
 
 
 
@@ -56,26 +116,77 @@ button.room:hover {
   display: none;  /* Safari and Chrome */
 }
 
+.message-container {
+  min-height: 300px;
+  max-height: 500px;
+  overflow-y: scroll;
+}
 div.message {
   background: var(--p-dark);
   color: #fff;
-  padding: 0.5em;
+  padding: 0.25em 0.5em;
   display: flex;
 }
 div.message:nth-child(odd) {
   background: var(--p);
 }
+
+.message-user-id {
+  font-size: 0.75em;
+  font-weight: 500;
+}
 .message-timestamp {
+  font-size:0.6em;
+  font-weight: 100;
   text-align: left;
   display: inline;
 }
-
-#youtube-queue-input {
-  height: 2em;
+.message-text {
+  font-weight: 100;
+  font-size: 1em;
 }
 
+/* VideoQueue.js */
+
+.youtube-queue-container {
+  min-height: 300px;
+  max-height: 500px;
+  overflow-y: scroll;
+}
+#youtube-queue-input, #chatbox-input {
+  height: 2em;
+}
+.queue-element-container {
+  display: flex;
+  padding: 0px;
+}
+.queue-element-container:hover {
+  background: var(--p);
+  cursor: pointer;
+}
+.queue-element-index {
+  padding: 30px 10px;
+}
+.queue-element-thumbnail {
+  padding: 5px 0;
+  width: 120px;
+}
+.queue-element-info {
+  padding: 7px 1em 0 1em;
+  font-weight: 100;
+}
+.queue-element-title {
+  font-size: 0.9em;
+  font-weight: 100;
+}
+.queue-element-channel {
+  font-size: 0.8em;
+  font-weight: 300;
+}
+/***************/
+
+/* YoutubePlayer.js */
 .youtube-player-container {
-  border: 1px solid white;
   position: relative;
   overflow: hidden;
   width: 100%;
@@ -92,6 +203,46 @@ div.message:nth-child(odd) {
 }
 
 .youtube-player-skeleton {
-  color: var(--s-light);
+  min-height: 400px;
+  border: 1px solid var(--s);
+  border-radius: 10px;
   padding: 2em;
+  color: var(--s-light);
+}
+
+.youtube-player-skeleton > h3 {
+  font-size: 1.5em;
+  font-weight: 300;
+  text-align:center;
+  padding: 80px 10px;
+}
+
+/***************/
+
+/* Footer.js */
+footer#app-footer {
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+  /* padding: 2em 10em 2em 0.5em; */
+  padding: 2em;
+  color: var(--s-light);
+}
+
+.footer-section {
+  padding: 1em;
+  font-size: 0.9em;
+  font-weight: 100;
+}
+
+.footer-section-header {
+  font-size: 1em;
+  font-weight: 400;
+}
+
+.footer-link {
+  color: var(--s-dark);
+}
+.footer-link:hover {
+  color: var(--s)
 }

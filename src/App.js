@@ -5,6 +5,7 @@ import YoutubePlayer from './components/YoutubePlayer';
 import VideoQueue from './components/VideoQueue';
 import ChatBox from './components/ChatBox';
 import NameChangeModal from './components/NameChangeModal';
+import Footer from './components/Footer';
 import { parseURL } from './utility/utility';
 // import { outline } from './utility/utility';
 import Button from 'react-bootstrap/Button';
@@ -14,15 +15,16 @@ import Col from 'react-bootstrap/Col';
 import InputGroup from 'react-bootstrap/InputGroup';
 import FormControl from 'react-bootstrap/FormControl';
 import Alert from 'react-bootstrap/Alert';
-import Tabs from 'react-bootstrap/Tabs';
-import Tab from 'react-bootstrap/Tab';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import TabContainer from 'react-bootstrap/esm/TabContainer';
+import TabContent from 'react-bootstrap/TabContent';
+import TabPane from 'react-bootstrap/TabPane';
+import Nav from 'react-bootstrap/Nav';
 
-const api = 'https://ytsync-server.herokuapp.com/';
 const { log } = console;
 
-let socket = socketIOClient(api);
+let socket = socketIOClient(process.env.REACT_APP_SERVER_API);
 
 function App() {
     const [id, setId] = useState('');
@@ -63,6 +65,19 @@ function App() {
             setCurrentVideo(curr);
         })
 
+        const handleOnTyping = (userId) => {
+            setUsersTyping(prevState => {
+                const set = new Set([...prevState, userId]);
+                return [...set];
+            });
+            setTimeout(() => {
+                setUsersTyping(prevState => {
+                    const newSet = new Set([...prevState]);
+                    newSet.delete(userId);
+                    return [...newSet];
+                });
+            }, 1000)
+        }
         socket.on(Events.typing, userId => {
             handleOnTyping(userId);
         })
@@ -72,16 +87,6 @@ function App() {
         })
 
     }, [])
-
-    function handleOnTyping(userId) {
-        const set = new Set([...usersTyping, userId]);
-        setUsersTyping([...set]);
-        setTimeout(() => {
-            const newSet = new Set([...usersTyping]);
-            newSet.delete(userId);
-            setUsersTyping([...newSet])
-        }, 1000)
-    }
 
     function createRoom() {
         socket.emit(Events.create_room, id, r => {
@@ -126,6 +131,10 @@ function App() {
         }
     }
 
+    function copyRoom() {
+        navigator.clipboard.writeText(room);
+    }
+
     function addToQueue(video) {
         const videoId = parseURL(video);
         if(videoId.length > 0) {
@@ -137,7 +146,7 @@ function App() {
 
     return (
         <div className="App">
-            <header className="App-header">YTsync</header>
+            <header className="App-header"><h1>YTsync</h1></header>
             <main>
                 {currentView === 'Home' && 
                     <Home 
@@ -149,12 +158,9 @@ function App() {
                         setAlert={setAlert}/>}
                 {currentView === 'Room' && 
                     <Room>
-                        <p style={{color:'white'}}>Room #{room}</p>
-                        <p style={{color:'white'}}>Name: {id}</p>
-                        <div style={{display:'flex', padding:'1em' }}>
-                            <Button size="sm" variant="danger" onClick={leaveRoom}>Leave Room</Button>
+                        <div style={{display:'flex', padding:'1em'}}>
+                            <Button size="sm" variant="outline-danger" onClick={leaveRoom}>Leave Room</Button>
                             <NameChangeModal socket={socket} alias={id}/>
-                            {/* <p style={{ margin: 0, textAlign:'right', color:'white' }}>Room #{room}</p> */}
                         </div>
 
                         <Container fluid>
@@ -169,29 +175,45 @@ function App() {
                                     room={room}
                                     />
                                 </Col>
-                                <Col sm={12} md={4} style={{borderLeft:'1px solid var(--s-light)'}}>
-                                    <Tabs defaultActiveKey="chat">
-                                    <Tab eventKey="queue" title="Queue">
-                                        <VideoQueue queue={queue} addToQueue={addToQueue} />
-                                    </Tab>
-                                    <Tab eventKey="chat" title="Chat">
-                                        <ChatBox
-                                            room={room}
-                                            messages={messages}
-                                            sendMessage={sendMessage}
-                                            emitUserTyping={emitUserTyping}
-                                            usersTyping={usersTyping} />
-                                    </Tab>
-                                </Tabs>
+                                <Col sm={12} md={4}>
+                                    <div style={{ display: 'flex', marginTop:'1em' }}>
+                                        <p onClick={copyRoom} className="room-text">Room: {` `}
+                                            <span className="room-number">#{room}</span></p>
+                                        <p className="room-text">Name: {id} </p>
+                                    </div>
+                                    <TabContainer defaultActiveKey="chat">
+                                        <Nav style={{marginBottom:1}}>
+                                            <Nav.Item className="tab-link-parent">
+                                                <Nav.Link className="tab-link" eventKey="chat">Chat</Nav.Link>
+                                            </Nav.Item>
+                                            <Nav.Item className="tab-link-parent">
+                                                <Nav.Link className="tab-link" eventKey="queue">Queue</Nav.Link>
+                                            </Nav.Item>
+                                        </Nav>
+                                        <TabContent>
+ 
+                                            <TabPane eventKey="chat">                                                
+                                                <ChatBox
+                                                    room={room}
+                                                    messages={messages}
+                                                    sendMessage={sendMessage}
+                                                    emitUserTyping={emitUserTyping}
+                                                    usersTyping={usersTyping} />
+                                            </TabPane>
+
+                                            <TabPane eventKey="queue">
+                                                <VideoQueue queue={queue} addToQueue={addToQueue} currentVideo={currentVideo} />
+                                            </TabPane>
+                                        </TabContent>
+                                    </TabContainer>
                                 </Col>
                             </Row>
-
-
                         </Container>
 
 
                     </Room>}
             </main>
+            <Footer/>
         </div>
     )
 }
@@ -199,7 +221,8 @@ function App() {
 function Home(props) {
     const { setRoom, joinRoom, createRoom, alert, setAlert } = props;
     return (
-        <Container style={{ padding:'1em', width:300}}>
+        <Container className="home-parent" fluid>
+            <div className="home-child">
                 <Button className="home" onClick={createRoom} block>Create Room</Button>
                 <p className="home">Or</p>
                 <InputGroup className="mb-3">
@@ -214,6 +237,7 @@ function Home(props) {
                         />                
                 </InputGroup>
                 { alert && <AlertMessage alert={alert} setAlert={setAlert}/> }
+            </div>
         </Container>
     );
 }

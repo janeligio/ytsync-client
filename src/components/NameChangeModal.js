@@ -17,7 +17,7 @@ export default function NameChangeModal({socket, alias}) {
     }
     return (
         <>
-        <Button size="sm" variant="info" onClick={handleShow}>Change Name</Button>
+        <Button style={{marginLeft:'10px'}} size="sm" variant="outline-info" onClick={handleShow}>Change Name</Button>
         <Modal show={show} onHide={handleClose}>
             <Modal.Body>Change your name from <em>{alias}</em> to
                 <FormControl

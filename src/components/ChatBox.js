@@ -3,7 +3,6 @@ import { displayTimestamp, randomRoomNumber} from '../utility/utility';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Card from 'react-bootstrap/Card';
 import InputGroup from 'react-bootstrap/InputGroup';
-import Button from 'react-bootstrap/Button';
 import FormControl from 'react-bootstrap/FormControl';
 
 export default function ChatBox({ messages, sendMessage, emitUserTyping, usersTyping }) {
@@ -20,11 +19,11 @@ export default function ChatBox({ messages, sendMessage, emitUserTyping, usersTy
         const timestamp = <small className="message-timestamp">{displayTimestamp(m.timestamp)}</small>;
         return (
             <ListGroup.Item className="message" key={randomRoomNumber(10)}>
-                <Card style={{ width: '100%', background:'inherit' }}>
-                <Card.Body style={{padding:0}}>
-                    { m.messageType === 'chat' 
-                        && <Card.Title style={{fontSize:'1em'}}>{m.userId} {timestamp}</Card.Title>}
-                    <Card.Text style={{fontSize:'1.em'}}>
+                <Card style={{ width: '100%', background:'inherit', border: 'none' }}>
+                <Card.Body style={{padding:0,}}>
+                    { m.messageType === 'chat' && 
+                    <Card.Title style={{margin:0}}>{timestamp} <span className="message-user-id">{m.userId}</span> </Card.Title>}
+                    <Card.Text className="message-text">
                         {m.message} 
                         {` `}
                         {m.messageType === 'welcome' && timestamp} 
@@ -37,26 +36,28 @@ export default function ChatBox({ messages, sendMessage, emitUserTyping, usersTy
 
     return (
         <div className="message-container-wrapper">
-            <ListGroup>
+            <ListGroup className="message-container">
                 { messages.length > 0 ? MessagesEl 
                 : <MessagesSkeleton/>}
                 <UsersTyping usersTyping={usersTyping}/>
             </ListGroup>
             <InputGroup className="mb-3">
                 <FormControl
+                    style={{borderRadius:0}}
+                    id="chatbox-input"
                     onKeyUp={_onKeyUp}
                     onChange={e => {
                         setText(e.target.value);
                         emitUserTyping();
                     }} 
                     value={text}
-                    placeholder=""
+                    placeholder="Something interesting..."
                     aria-label="Default"
                     aria-describedby="inputGroup-sizing-default"
                     />
-                <InputGroup.Append>
+                {/* <InputGroup.Append>
                 <Button className="home" onClick={() => { sendMessage(text); setText('') }} block>Send</Button> 
-                </InputGroup.Append>        
+                </InputGroup.Append>         */}
             </InputGroup>
         </div>
     );
@@ -70,7 +71,7 @@ function UsersTyping(props) {
         if(users.length === 1) {
             usersTypingEl = 
                 <ListGroup.Item className="message">
-                    <Card style={{ width: '100%', background:'inherit' }}>
+                    <Card style={{ width: '100%', background:'inherit', border: 'none' }}>
                         <Card.Body style={{padding:0}}>
                             <Card.Text style={{fontSize:'0.8em', textAlign:'center'}}>
                                 {users.join()} is typing...
@@ -81,7 +82,7 @@ function UsersTyping(props) {
         } else {
             usersTypingEl =
             <ListGroup.Item className="message">
-                <Card style={{ width: '100%', background:'inherit' }}>
+                <Card style={{ width: '100%', background:'inherit', border: 'none' }}>
                     <Card.Body style={{padding:0}}>
                         <Card.Text style={{fontSize:'0.8em', textAlign:'center'}}>
                             {users.join(', ')} are typing...
@@ -97,13 +98,13 @@ function UsersTyping(props) {
 function MessagesSkeleton() {
     return (
         <ListGroup.Item className="message">
-                <Card style={{ width: '100%', background:'inherit' }}>
-                <Card.Body style={{padding:0}}>
-                    <Card.Text style={{fontSize:'1.em'}}>
-                        <em>Send the first chat!</em>
-                    </Card.Text>
-                </Card.Body>
-                </Card>
-            </ListGroup.Item>
+            <Card style={{ width: '100%', background:'inherit', border: 'none' }}>
+            <Card.Body style={{padding:0}}>
+                <Card.Text style={{fontSize:'1.em'}}>
+                    <em>Send the first chat!</em>
+                </Card.Text>
+            </Card.Body>
+            </Card>
+        </ListGroup.Item>
     );
 }

@@ -116,7 +116,8 @@ export default function YoutubePlayer(props) {
                     onPause={_onPause}                    // defaults -> noop
                     onEnd={_onEnd}
                     onStateChange={_onStateChange}/>
-            :   <YoutubePlayerSkeleton/>
+            :   <YoutubePlayerSkeleton                     onClick={() => log('clickity clack')}
+            />
             }
 
         </>);

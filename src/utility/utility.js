@@ -33,3 +33,5 @@ export function parseURL(URL) {
 }
 
 export const outline = { border: '1px solid white'};
+
+export const API = 'https://ytsync-server.herokuapp.com';

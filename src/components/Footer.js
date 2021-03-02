@@ -41,12 +41,3 @@ function CustomLink({ href, children}) {
         </a>
     );
 }
-
-function Line() {
-    const lineStyle = {
-        width: '1px',
-        borderLeft: '1px solid var(--s-light)'
-    }
-    return(<div style={lineStyle}>
-    </div>)
-}

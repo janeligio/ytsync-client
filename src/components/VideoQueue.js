@@ -6,7 +6,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Image from 'react-bootstrap/Image';
 import Spinner from 'react-bootstrap/Spinner';
-import { randomRoomNumber, API } from '../utility/utility';
+import { randomRoomNumber } from '../utility/utility';
 
 export default function VideoQueue(props) {
     const { queue, addToQueue, currentVideo } = props;
@@ -45,7 +45,7 @@ function VideoData({videoId, index, isPlaying}) {
     const [title, setTitle] = useState('');
     const [channel, setChannel] = useState('');
     const [thumbnailData, setThumbnailData] = useState(null);
-    const endpoint = `${API}/video/${videoId}`;
+    const endpoint = `${process.env.REACT_APP_SERVER_API}/video/${videoId}`;
     useEffect(() => {
         axios({
             method:'get',

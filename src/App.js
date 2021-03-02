@@ -22,10 +22,9 @@ import TabContent from 'react-bootstrap/TabContent';
 import TabPane from 'react-bootstrap/TabPane';
 import Nav from 'react-bootstrap/Nav';
 
-const api = '/';
 const { log } = console;
 
-let socket = socketIOClient(api);
+let socket = socketIOClient(process.env.REACT_APP_SERVER_API);
 
 function App() {
     const [id, setId] = useState('');

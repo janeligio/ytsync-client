@@ -10,7 +10,9 @@
 }
 .App {
   background-color: var(--p-dark);
-  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 header {
   background: var(--p-dark);
@@ -94,4 +96,33 @@ div.message:nth-child(odd) {
 .youtube-player-skeleton {
   color: var(--s-light);
   padding: 2em;
+}
+
+main {
+  flex: 1;
+}
+footer#app-footer {
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 2em 10em 2em 0.5em;
+  color: var(--s-light);
+}
+
+.footer-section {
+  padding: 1em;
+  font-size: 0.9em;
+  font-weight: 100;
+}
+
+.footer-section-header {
+  font-size: 1em;
+  font-weight: 400;
+}
+
+.footer-link {
+  color: var(--s-dark);
+}
+.footer-link:hover {
+  color: var(--s)
 }

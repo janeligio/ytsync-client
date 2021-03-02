@@ -5,6 +5,7 @@ import YoutubePlayer from './components/YoutubePlayer';
 import VideoQueue from './components/VideoQueue';
 import ChatBox from './components/ChatBox';
 import NameChangeModal from './components/NameChangeModal';
+import Footer from './components/Footer';
 import { parseURL } from './utility/utility';
 // import { outline } from './utility/utility';
 import Button from 'react-bootstrap/Button';
@@ -149,8 +150,10 @@ function App() {
                         setAlert={setAlert}/>}
                 {currentView === 'Room' && 
                     <Room>
-                        <p style={{color:'white'}}>Room #{room}</p>
-                        <p style={{color:'white'}}>Name: {id}</p>
+                        <div style={{display:'flex'}}>
+                            <p style={{color:'white'}}>Room #{room} {` `}</p>
+                            <p style={{color:'white'}}>Name: {id} </p>
+                        </div>
                         <div style={{display:'flex', padding:'1em' }}>
                             <Button size="sm" variant="danger" onClick={leaveRoom}>Leave Room</Button>
                             <NameChangeModal socket={socket} alias={id}/>
@@ -171,18 +174,18 @@ function App() {
                                 </Col>
                                 <Col sm={12} md={4} style={{borderLeft:'1px solid var(--s-light)'}}>
                                     <Tabs defaultActiveKey="chat">
-                                    <Tab eventKey="queue" title="Queue">
-                                        <VideoQueue queue={queue} addToQueue={addToQueue} />
-                                    </Tab>
-                                    <Tab eventKey="chat" title="Chat">
-                                        <ChatBox
-                                            room={room}
-                                            messages={messages}
-                                            sendMessage={sendMessage}
-                                            emitUserTyping={emitUserTyping}
-                                            usersTyping={usersTyping} />
-                                    </Tab>
-                                </Tabs>
+                                        <Tab eventKey="queue" title="Queue">
+                                            <VideoQueue queue={queue} addToQueue={addToQueue} />
+                                        </Tab>
+                                        <Tab eventKey="chat" title="Chat">
+                                            <ChatBox
+                                                room={room}
+                                                messages={messages}
+                                                sendMessage={sendMessage}
+                                                emitUserTyping={emitUserTyping}
+                                                usersTyping={usersTyping} />
+                                        </Tab>
+                                    </Tabs>
                                 </Col>
                             </Row>
 
@@ -192,6 +195,7 @@ function App() {
 
                     </Room>}
             </main>
+            <Footer/>
         </div>
     )
 }

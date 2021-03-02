@@ -203,7 +203,8 @@ function App() {
 function Home(props) {
     const { setRoom, joinRoom, createRoom, alert, setAlert } = props;
     return (
-        <Container style={{ padding:'1em', width:300}}>
+        <Container className="home-parent" fluid>
+            <div className="home-child">
                 <Button className="home" onClick={createRoom} block>Create Room</Button>
                 <p className="home">Or</p>
                 <InputGroup className="mb-3">
@@ -218,6 +219,7 @@ function Home(props) {
                         />                
                 </InputGroup>
                 { alert && <AlertMessage alert={alert} setAlert={setAlert}/> }
+            </div>
         </Container>
     );
 }

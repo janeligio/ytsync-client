@@ -177,7 +177,7 @@ function App() {
                                     />
                                 </Col>
                                 <Col sm={12} md={4}>
-                                    <div style={{ display: 'flex' }}>
+                                    <div style={{ display: 'flex', marginTop:'1em' }}>
                                         <p onClick={copyRoom} className="room-text">Room: {` `}
                                             <span className="room-number">#{room}</span></p>
                                         <p className="room-text">Name: {id} </p>

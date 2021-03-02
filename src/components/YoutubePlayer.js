@@ -42,8 +42,6 @@ export default function YoutubePlayer(props) {
     }, [videoPlayer, socket, currentVideo, queue, setCurrentVideo, setQueue])
 
     const opts = {
-        // height:'390', width:'640',
-        // height:'900', width:'1200',
         playerVars: {
             autoplay:1,
             controls:1, // Show the controls or not
@@ -128,13 +126,11 @@ function YoutubePlayerSkeleton() {
         <Container>
             <Row>
                 <Col className="youtube-player-skeleton">
-                    <h3 style={{color:'white'}}>
+                    <h3>
                         Add a youtube video...
-
                     </h3>
                 </Col>
             </Row>
-
         </Container>
     );
 }

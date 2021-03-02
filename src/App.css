@@ -203,8 +203,18 @@ div.message:nth-child(odd) {
 }
 
 .youtube-player-skeleton {
-  color: var(--s-light);
+  min-height: 400px;
+  border: 1px solid var(--s);
+  border-radius: 10px;
   padding: 2em;
+  color: var(--s-light);
+}
+
+.youtube-player-skeleton > h3 {
+  font-size: 1.5em;
+  font-weight: 300;
+  text-align:center;
+  padding: 80px 10px;
 }
 
 /***************/

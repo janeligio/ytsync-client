@@ -2,18 +2,9 @@ import { useState } from 'react';
 import { displayTimestamp, randomRoomNumber} from '../utility/utility';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Card from 'react-bootstrap/Card';
-import InputGroup from 'react-bootstrap/InputGroup';
 import FormControl from 'react-bootstrap/FormControl';
 
 export default function ChatBox({ messages, sendMessage, emitUserTyping, usersTyping }) {
-    const [text, setText] = useState('');
-
-    function _onKeyUp(e) {
-        if(e.key === 'Enter' && e.keyCode === 13) {
-            sendMessage(text); 
-            setText('');
-        }
-    }
 
     const MessagesEl = messages.map(m => {
         const timestamp = <small className="message-timestamp">{displayTimestamp(m.timestamp)}</small>;
@@ -41,24 +32,7 @@ export default function ChatBox({ messages, sendMessage, emitUserTyping, usersTy
                 : <MessagesSkeleton/>}
                 <UsersTyping usersTyping={usersTyping}/>
             </ListGroup>
-            <InputGroup className="mb-3">
-                <FormControl
-                    style={{borderRadius:0}}
-                    id="chatbox-input"
-                    onKeyUp={_onKeyUp}
-                    onChange={e => {
-                        setText(e.target.value);
-                        emitUserTyping();
-                    }} 
-                    value={text}
-                    placeholder="Something interesting..."
-                    aria-label="Default"
-                    aria-describedby="inputGroup-sizing-default"
-                    />
-                {/* <InputGroup.Append>
-                <Button className="home" onClick={() => { sendMessage(text); setText('') }} block>Send</Button> 
-                </InputGroup.Append>         */}
-            </InputGroup>
+            <ChatBoxInput sendMessage={sendMessage} emitUserTyping={emitUserTyping}/>
         </div>
     );
 };
@@ -93,6 +67,31 @@ function UsersTyping(props) {
         }
     }
     return (usersTypingEl);
+}
+
+function ChatBoxInput({sendMessage, emitUserTyping}) {
+    const [text, setText] = useState('');
+    function handleOnKeyUp(e) {
+        if(e.key === 'Enter' && e.keyCode === 13) {
+            sendMessage(text); 
+            setText('');
+        }
+    }
+    return (
+        <FormControl
+            style={{borderRadius:0}}
+            id="chatbox-input"
+            onKeyUp={handleOnKeyUp}
+            onChange={e => {
+                setText(e.target.value);
+                emitUserTyping();
+            }} 
+            value={text}
+            placeholder="Something interesting..."
+            aria-label="Default"
+            aria-describedby="inputGroup-sizing-default"
+            />
+    );
 }
 
 function MessagesSkeleton() {

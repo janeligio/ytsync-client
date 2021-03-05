@@ -9,8 +9,7 @@ import Col from 'react-bootstrap/Col';
 const { log, dir } = console;
 
 export default function YoutubePlayer(props) {
-    const {queue, setQueue, currentVideo, setCurrentVideo, room, socket } = props;
-    const [videoPlayer, setVideoPlayer] = useState(undefined);
+    const {queue, setQueue, currentVideo, setCurrentVideo, room, socket, videoPlayer, setVideoPlayer } = props;
     const [joined, setJoined] = useState(false);
 
     useEffect(() => {
@@ -39,6 +38,13 @@ export default function YoutubePlayer(props) {
                 videoPlayer.pauseVideo();
             }
         })
+        socket.on('player load video', index => {
+            log(`Event: load video #${index}`);
+            if(videoPlayer) {
+                videoPlayer.loadVideoById(queue[index]);
+                videoPlayer.pauseVideo();
+            }
+        });
     }, [videoPlayer, socket, currentVideo, queue, setCurrentVideo, setQueue])
 
     const opts = {
@@ -52,12 +58,11 @@ export default function YoutubePlayer(props) {
     function _onReady(e) {
         setVideoPlayer(e.target);
         dir(videoPlayer);
-        const API = 'https://ytsync-server.herokuapp.com';
         if(!joined) {
             log(`Getting room:${room} state.`)
             axios({
                 method:'get',
-                url: `${API}/room/${room}`
+                url: `${process.env.REACT_APP_SERVER_API}/room/${room}`
             }).then(res => {
                 log(`Got room:${room} state.`)
                 log(`Current time:${res.data.currentTime}`, `Player state:${res.data.playerState}`);

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import socketIOClient from 'socket.io-client';
+import axios from 'axios';
 import Events from './events/Events';
 import YoutubePlayer from './components/YoutubePlayer';
 import VideoQueue from './components/VideoQueue';
@@ -33,6 +34,8 @@ function App() {
     const [usersTyping, setUsersTyping] = useState([]);
     const [isTyping, setIsTyping] = useState(false);
     const [queue, setQueue] = useState([]);
+    const [queueData, setQueueData] = useState([]);
+    const [videoPlayer, setVideoPlayer] = useState(undefined);
     const [currentVideo, setCurrentVideo] = useState(0);
     const [currentView, setCurrentView] = useState('Home');
     const [alert, setAlert] = useState('');
@@ -52,15 +55,40 @@ function App() {
         socket.on(Events.receive_all_messages, allMessages => {
             setMessages([...allMessages]);
         })
+
+        const fetchVideoData = (videoId) => {
+            const endpoint = `${process.env.REACT_APP_SERVER_API}/video/${videoId}`;
+            return axios({
+                method:'get',
+                url:endpoint
+            });
+        };
+        
+        const requestAll = (videoIds) =>  {
+            let queueDataPromises = [];
+            videoIds.forEach(videoId => {
+                queueDataPromises.push(fetchVideoData(videoId));
+            })
+            Promise.all(queueDataPromises).then(responses => {
+                let data = [];
+                responses.forEach(response => {
+                    let queueDatum = {};
+                    queueDatum.title = response.data.title;
+                    queueDatum.channel = response.data.channel;
+                    queueDatum.thumbnail = response.data.thumbnails.default;
+                    data.push(queueDatum);
+                })
+                setQueueData([...data]);
+            })
+        }
+
         socket.on(Events.receive_room_state, state => {
             setMessages([...state.chatHistory]);
-            setQueue([...state.queue]);
             setCurrentVideo(state.currentVideo);
+            setQueue([...state.queue]);
+            requestAll(state.queue);
         })
 
-        socket.on(Events.get_queue, queue => {
-            setQueue([...queue]);
-        })
         socket.on(Events.get_current_video, curr => {
             setCurrentVideo(curr);
         })
@@ -82,10 +110,23 @@ function App() {
             handleOnTyping(userId);
         })
 
-        socket.on(Events.add_to_queue, (room, video) => {
-            setQueue(prevState => [...prevState, video]);
+        socket.on(Events.add_to_queue, (room, videoId) => {
+            setQueue(prevState => [...prevState, videoId]);
+            fetchVideoData(videoId).then(res => {
+                console.log(res.data);
+                let queueDatum = {};
+                queueDatum.title = res.data.title;
+                queueDatum.channel = res.data.channel;
+                queueDatum.thumbnail = res.data.thumbnails.default;
+                setQueueData(prevState => [...prevState, queueDatum]);
+            }).catch(err => console.log(err));
         })
 
+        socket.on(Events.remove_from_queue, queue => {
+            log(queue);
+            setQueue([...queue]);
+            requestAll(queue);
+        })
     }, [])
 
     function createRoom() {
@@ -144,6 +185,21 @@ function App() {
         }
     }
 
+    function removeFromQueue(index) {
+        const isEmpty = queue.length === 0;
+        const inBounds = !(index < 0) && (index < queue.length);
+        log(`Attempting to remove video ${index}`)
+        if(!isEmpty && inBounds) {
+            socket.emit(Events.remove_from_queue, room, index);
+        } else {
+            log(`Error removing from queue`);
+        }
+    }
+
+    function emitLoadVideo(index) {
+        socket.emit('player load video', room, index);
+    }
+
     return (
         <div className="App">
             <header className="App-header"><h1>YTsync</h1></header>
@@ -158,25 +214,26 @@ function App() {
                         setAlert={setAlert}/>}
                 {currentView === 'Room' && 
                     <Room>
-                        <div style={{display:'flex', padding:'1em'}}>
-                            <Button size="sm" variant="outline-danger" onClick={leaveRoom}>Leave Room</Button>
-                            <NameChangeModal socket={socket} alias={id}/>
-                        </div>
-
                         <Container fluid>
                             <Row style={{minHeight:'300px'}}>
+                                
                                 <Col sm={12} md={8} style={{ padding:0}}>
+                                <div style={{display: 'flex', padding: '1em' }}>
+                                    <Button size="sm" variant="outline-danger" onClick={leaveRoom}>Leave Room</Button>
+                                    <NameChangeModal socket={socket} alias={id} />
+                                </div>
                                     <YoutubePlayer
-                                    queue={queue}
-                                    setQueue={setQueue}
-                                    currentVideo={currentVideo}
-                                    setCurrentVideo={setCurrentVideo}
-                                    socket={socket}
-                                    room={room}
-                                    />
+                                        queue={queue}
+                                        setQueue={setQueue}
+                                        currentVideo={currentVideo}
+                                        setCurrentVideo={setCurrentVideo}
+                                        videoPlayer={videoPlayer} 
+                                        setVideoPlayer={setVideoPlayer}
+                                        socket={socket}
+                                        room={room}/>
                                 </Col>
                                 <Col sm={12} md={4}>
-                                    <div style={{ display: 'flex', marginTop:'1em' }}>
+                                    <div style={{display: 'flex' }}>
                                         <p onClick={copyRoom} className="room-text">Room: {` `}
                                             <span className="room-number">#{room}</span></p>
                                         <p className="room-text">Name: {id} </p>
@@ -191,7 +248,6 @@ function App() {
                                             </Nav.Item>
                                         </Nav>
                                         <TabContent>
- 
                                             <TabPane eventKey="chat">                                                
                                                 <ChatBox
                                                     room={room}
@@ -200,17 +256,22 @@ function App() {
                                                     emitUserTyping={emitUserTyping}
                                                     usersTyping={usersTyping} />
                                             </TabPane>
-
                                             <TabPane eventKey="queue">
-                                                <VideoQueue queue={queue} addToQueue={addToQueue} currentVideo={currentVideo} />
+                                                <VideoQueue 
+                                                    queue={queue}
+                                                    queueData={queueData}
+                                                    addToQueue={addToQueue}
+                                                    removeFromQueue={removeFromQueue}
+                                                    currentVideo={currentVideo}
+                                                    setCurrentVideo={setCurrentVideo}
+                                                    videoPlayer={videoPlayer}
+                                                    emitLoadVideo={emitLoadVideo} />
                                             </TabPane>
                                         </TabContent>
                                     </TabContainer>
                                 </Col>
                             </Row>
                         </Container>
-
-
                     </Room>}
             </main>
             <Footer/>

@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState } from 'react';
 import FormControl from 'react-bootstrap/FormControl';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -7,21 +6,34 @@ import Col from 'react-bootstrap/Col';
 import Image from 'react-bootstrap/Image';
 import Spinner from 'react-bootstrap/Spinner';
 import { randomRoomNumber } from '../utility/utility';
+import { AiFillDelete } from "react-icons/ai";
 
 export default function VideoQueue(props) {
-    const { queue, addToQueue, currentVideo } = props;
+    const { queue, queueData, addToQueue, currentVideo, setCurrentVideo, removeFromQueue, videoPlayer, emitLoadVideo } = props;
 
-    const queueEl = queue ? queue.map((q, index) => {
+    const loadVideo = (index) => {
+        if(index !== currentVideo) {
+            setCurrentVideo(index);
+            const videoId = queue[index];
+            if(videoPlayer) {
+                videoPlayer.loadVideoById(videoId);
+                videoPlayer.pauseVideo();
+                emitLoadVideo(index);
+            }
+        }
+    }
+
+    const queueEl = queueData ? queueData.map((datum, index) => {
         const isPlaying = (currentVideo === index) ? true : false;
         return (
-            <VideoData key={randomRoomNumber(10)} index={index} videoId={q} isPlaying={isPlaying}/>
+            <VideoData key={randomRoomNumber(10)} index={index} videoData={datum} loadVideo={loadVideo} removeFromQueue={removeFromQueue} isPlaying={isPlaying}/>
         );
     }) : null;
 
     return (
         <div className="youtube-queue">
             <Container className="youtube-queue-container" fluid>
-                {queue.length > 0 ? queueEl
+                {queueData.length > 0 ? queueEl
                 : <QueueSkeleton/>}
             </Container>
             <div style={{padding:'0'}}>
@@ -41,29 +53,16 @@ function QueueSkeleton() {
     );
 }
 
-function VideoData({videoId, index, isPlaying}) {
-    const [title, setTitle] = useState('');
-    const [channel, setChannel] = useState('');
-    const [thumbnailData, setThumbnailData] = useState(null);
-    const endpoint = `${process.env.REACT_APP_SERVER_API}/video/${videoId}`;
-    useEffect(() => {
-        axios({
-            method:'get',
-            url:endpoint
-        }).then(res => {
-            console.log(res.data);
-            setTitle(res.data.title);
-            setChannel(res.data.channelTitle);
-            setThumbnailData(res.data.thumbnails.default);
-        }).catch(e => console.log(e));
-    }, [])
-    const thumbnail = thumbnailData ? <Image fluid src={thumbnailData.url} /> 
+function VideoData({loadVideo, videoData, index, isPlaying, removeFromQueue}) {
+    const thumbnail = videoData.thumbnail ? <Image fluid src={videoData.thumbnail.url} /> 
             :   <Spinner animation="border" role="status">
                     <span className="sr-only">Loading...</span>
                 </Spinner>;
+    const handlePlayVideo = () => loadVideo(index);
+    const handleRemove = () => removeFromQueue(index);
     return(
         <Row style={{color: 'white', marginBottom:'0.25em'}}>
-            <Col style={{padding:0, background: (isPlaying?'var(--p)':'')}} className="queue-element-container">
+            <Col onClick={handlePlayVideo} style={{padding:0, background: (isPlaying?'var(--p)':'')}} className="queue-element-container">
                 <div className="queue-element-index">
                     <small>{index+1}</small>
                 </div>
@@ -71,12 +70,17 @@ function VideoData({videoId, index, isPlaying}) {
                     {thumbnail}
                 </div>
                 <div className="queue-element-info">
-                    <h3 className="queue-element-title">{title}</h3>
-                    <small className="queue-element-channel">{channel}</small>
+                    <h3 className="queue-element-title">{videoData.title}</h3>
+                    <small className="queue-element-channel">{videoData.channel}</small>
+                </div>
+                <div className="queue-element-icon-container">
+                    <AiFillDelete className="delete-icon" onClick={handleRemove}/>
                 </div>
             </Col>
         </Row>)
 }
+
+
 
 const VideoQueueInput = ({addToQueue}) => {
     const [text, setText] = useState('');

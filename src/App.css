@@ -99,6 +99,7 @@ button.room:hover {
 .room-text {
   color: var(--s-light);
   padding-left: 1em;
+  margin-bottom: 0;
   font-size: 0.9em;
 }
 .room-number:hover {
@@ -183,6 +184,15 @@ div.message:nth-child(odd) {
   font-size: 0.8em;
   font-weight: 300;
 }
+.queue-element-icon-container {
+  flex: 1;
+  text-align: right;
+  padding: 30px 10px 30px 0;
+}
+
+.delete-icon:hover {
+  color: var(--s);
+}
 /***************/
 
 /* YoutubePlayer.js */
@@ -191,6 +201,7 @@ div.message:nth-child(odd) {
   overflow: hidden;
   width: 100%;
   padding-top: 56.25%; /* 16:9 Aspect Ratio (divide 9 by 16 = 0.5625) */
+  margin-bottom: 1em;
 }
 .youtube-player {
   position: absolute;

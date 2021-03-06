@@ -9,7 +9,7 @@ import Col from 'react-bootstrap/Col';
 const { log, dir } = console;
 
 export default function YoutubePlayer(props) {
-    const {queue, setQueue, currentVideo, setCurrentVideo, room, socket, videoPlayer, setVideoPlayer } = props;
+    const {queue, setQueue, currentVideo, setCurrentVideo, room, socket, videoPlayer, setVideoPlayer, emitLoadVideo } = props;
     const [joined, setJoined] = useState(false);
 
     useEffect(() => {
@@ -100,6 +100,17 @@ export default function YoutubePlayer(props) {
         }
     }
     function _onEnd(e) {
+        console.log(`Video ended`)
+        const isLastVideo = currentVideo === queue.length-1;
+        const isEmpty = queue.length === 0;
+        if(!isLastVideo && !isEmpty) {
+            const nextVideoIndex = currentVideo + 1;
+            setCurrentVideo(nextVideoIndex);
+            const videoId = queue[nextVideoIndex];
+            e.target.loadVideoById(videoId);
+            e.target.playVideo();
+            emitLoadVideo(nextVideoIndex);
+        }
     }
     function _onStateChange(e) {
         log(e.target.getPlayerState());    

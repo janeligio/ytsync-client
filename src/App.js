@@ -127,6 +127,10 @@ function App() {
             setQueue([...queue]);
             requestAll(queue);
         })
+
+        return () => {
+            socket.removeAllListeners();
+        };
     }, [])
 
     function createRoom() {
@@ -230,6 +234,7 @@ function App() {
                                         videoPlayer={videoPlayer} 
                                         setVideoPlayer={setVideoPlayer}
                                         socket={socket}
+                                        emitLoadVideo={emitLoadVideo}
                                         room={room}/>
                                 </Col>
                                 <Col sm={12} md={4}>
